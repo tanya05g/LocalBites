@@ -1,0 +1,844 @@
+!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LocalBites — Vote for the Dish, Not the Joint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --terra: #C4522A;
+    --terra-light: #E8704A;
+    --terra-dark: #8B3518;
+    --amber: #E8A020;
+    --amber-light: #F5C842;
+    --cream: #FAF3E8;
+    --cream-dark: #F0E5D0;
+    --dark: #1A1208;
+    --dark-2: #2A1E0F;
+    --dark-3: #3D2E1A;
+    --dark-4: #56432A;
+    --muted: #8B7355;
+    --text: #FAF3E8;
+    --text-muted: #C4A882;
+    --green: #5A8C5A;
+    --red: #C44040;
+    --card-bg: rgba(42, 30, 15, 0.95);
+    --border: rgba(196, 168, 130, 0.15);
+    --border-hover: rgba(196, 168, 130, 0.35);
+  }
+  /* ── Utility classes replacing Tailwind ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  .flex { display: flex !important; }
+  .flex-col { flex-direction: column !important; }
+  .flex-wrap { flex-wrap: wrap !important; }
+  .items-center { align-items: center !important; }
+  .items-start { align-items: flex-start !important; }
+  .justify-center { justify-content: center !important; }
+  .justify-between { justify-content: space-between !important; }
+  .gap-1 { gap: 4px; } .gap-2 { gap: 8px; } .gap-3 { gap: 12px; } .gap-4 { gap: 16px; } .gap-5 { gap: 20px; }
+  .mb-1 { margin-bottom: 4px; } .mb-2 { margin-bottom: 8px; } .mb-3 { margin-bottom: 12px; }
+  .mb-4 { margin-bottom: 16px; } .mb-5 { margin-bottom: 20px; } .mb-6 { margin-bottom: 24px; }
+  .mr-2 { margin-right: 8px; } .mt-2 { margin-top: 8px; }
+  .p-3 { padding: 12px; } .p-4 { padding: 16px; } .p-5 { padding: 20px; } .p-6 { padding: 24px; }
+  .px-4 { padding-left: 16px; padding-right: 16px; } .px-6 { padding-left: 24px; padding-right: 24px; }
+  .pt-1 { padding-top: 4px; }
+  .block { display: block; } .relative { position: relative; } .fixed { position: fixed; }
+  .top-0 { top: 0; } .left-0 { left: 0; } .right-0 { right: 0; }
+  .z-50 { z-index: 50; } .z-300 { z-index: 300; } .z-500 { z-index: 500; } .z-600 { z-index: 600; }
+  .w-8 { width: 32px; } .h-8 { height: 32px; }
+  .h-60px { height: 60px; }
+  .rounded-lg { border-radius: 8px; }
+  .text-xs { font-size: 12px; } .text-sm { font-size: 14px; } .text-base { font-size: 16px; } .text-lg { font-size: 20px; }
+  .leading-none { line-height: 1; } .leading-tight { line-height: 1.25; } .leading-relaxed { line-height: 1.625; }
+  .font-bold { font-weight: 700; } .font-800 { font-weight: 800; }
+  .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .overflow-hidden { overflow: hidden; }
+  .top-half { top: 50%; } .left-3 { left: 12px; }
+  .translate-y-neg-half { transform: translateY(-50%); }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--dark);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  h1, h2, h3, h4, .font-display { font-family: 'Syne', sans-serif; }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--dark-2); }
+  ::-webkit-scrollbar-thumb { background: var(--dark-4); border-radius: 2px; }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 1000; opacity: 0.6;
+  }
+  .nav { background: rgba(26,18,8,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+  .map-container { background: var(--dark-2); position: relative; overflow: hidden; }
+  .map-dot {
+    position: absolute; width: 10px; height: 10px; border-radius: 50%;
+    background: var(--terra); border: 2px solid var(--cream);
+    cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; z-index: 10;
+  }
+  .map-dot:hover, .map-dot.active { transform: scale(1.6); box-shadow: 0 0 0 6px rgba(196,82,42,0.25); }
+  .map-dot.top-dish { background: var(--amber); width: 13px; height: 13px; }
+  .map-pulse { position: absolute; border-radius: 50%; background: rgba(196,82,42,0.2); animation: pulse-ring 2.5s ease-out infinite; }
+  @keyframes pulse-ring { 0% { transform: scale(0.8); opacity: 1; } 100% { transform: scale(2.5); opacity: 0; } }
+  .map-label {
+    position: absolute; font-size: 10px; font-family: 'Syne', sans-serif; font-weight: 600;
+    color: var(--cream); background: rgba(26,18,8,0.85); padding: 2px 6px; border-radius: 4px;
+    pointer-events: none; white-space: nowrap; border: 1px solid var(--border);
+  }
+  .map-street { position: absolute; background: rgba(196,168,130,0.08); border: 1px solid rgba(196,168,130,0.1); }
+  .map-block { position: absolute; background: rgba(42,30,15,0.6); border: 1px solid rgba(196,168,130,0.06); border-radius: 2px; }
+  .dish-card {
+    background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
+    transition: border-color 0.2s, transform 0.15s; cursor: pointer; position: relative; overflow: hidden;
+  }
+  .dish-card::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: var(--terra); border-radius: 3px 0 0 3px; transform: scaleY(0); transition: transform 0.2s;
+  }
+  .dish-card:hover::before { transform: scaleY(1); }
+  .dish-card:hover { border-color: var(--border-hover); transform: translateY(-1px); }
+  .dish-card.voted-up::before { background: var(--green); transform: scaleY(1); }
+  .dish-card.voted-down::before { background: var(--red); transform: scaleY(1); }
+  .vote-btn {
+    display: flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--border);
+    background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.15s; font-size: 16px;
+  }
+  .vote-btn:hover { border-color: var(--border-hover); color: var(--text); }
+  .vote-btn.up.active { background: rgba(90,140,90,0.2); border-color: var(--green); color: var(--green); }
+  .vote-btn.down.active { background: rgba(196,64,64,0.2); border-color: var(--red); color: var(--red); }
+  .flavor-tag {
+    display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 20px;
+    border: 1px solid var(--border); font-size: 12px; font-weight: 500; color: var(--text-muted);
+    background: rgba(42,30,15,0.8); cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  }
+  .flavor-tag:hover { border-color: var(--terra); color: var(--terra-light); }
+  .flavor-tag.active { background: rgba(196,82,42,0.15); border-color: var(--terra); color: var(--terra-light); }
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(10,7,3,0.85); z-index: 500;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s; backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: auto; }
+  .modal-box {
+    background: var(--dark-2); border: 1px solid var(--border-hover); border-radius: 16px;
+    width: min(520px, 95vw); max-height: 90vh; overflow-y: auto;
+    transform: translateY(20px); transition: transform 0.25s;
+  }
+  .modal-overlay.open .modal-box { transform: translateY(0); }
+  .form-input, .form-select, .form-textarea {
+    width: 100%; background: rgba(26,18,8,0.8); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); padding: 10px 14px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; transition: border-color 0.2s; outline: none;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    border-color: var(--terra); box-shadow: 0 0 0 3px rgba(196,82,42,0.1);
+  }
+  .form-input::placeholder, .form-textarea::placeholder { color: var(--muted); }
+  .form-select option { background: var(--dark-2); }
+  .form-textarea { resize: vertical; min-height: 80px; }
+  .lb-row {
+    display: flex; align-items: center; gap: 12px;
+    border-bottom: 1px solid var(--border); transition: background 0.15s;
+    border-radius: 6px; padding: 10px 8px;
+  }
+  .lb-row:hover { background: rgba(196,82,42,0.06); }
+  .lb-rank { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; width: 32px; text-align: center; }
+  .lb-rank.gold { color: var(--amber); }
+  .lb-rank.silver { color: #C0C0C0; }
+  .lb-rank.bronze { color: #CD7F32; }
+  .lb-rank.other { color: var(--muted); }
+  .btn-primary {
+    background: var(--terra); color: var(--cream); border: none; border-radius: 10px;
+    padding: 11px 22px; font-family: 'Syne', sans-serif; font-weight: 600; font-size: 14px;
+    cursor: pointer; transition: background 0.15s, transform 0.1s;
+  }
+  .btn-primary:hover { background: var(--terra-light); }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-ghost {
+    background: transparent; color: var(--text-muted); border: 1px solid var(--border);
+    border-radius: 10px; padding: 11px 22px; font-family: 'Syne', sans-serif;
+    font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.15s;
+  }
+  .btn-ghost:hover { border-color: var(--border-hover); color: var(--text); }
+  .score-badge {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px;
+    min-width: 40px; text-align: center; padding: 2px 6px; border-radius: 6px;
+  }
+  .score-badge.positive { color: var(--green); }
+  .score-badge.neutral { color: var(--muted); }
+  .score-badge.negative { color: var(--red); }
+  .price-badge {
+    font-size: 12px; font-weight: 500; color: var(--amber-light);
+    background: rgba(232,160,32,0.12); border: 1px solid rgba(232,160,32,0.2);
+    border-radius: 6px; padding: 2px 8px;
+  }
+  .dist-badge { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 3px; }
+  .toast-container {
+    position: fixed; bottom: 24px; right: 24px; z-index: 600;
+    display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+  }
+  .toast {
+    background: var(--dark-3); border: 1px solid var(--border-hover); border-radius: 10px;
+    padding: 12px 16px; font-size: 13px; font-weight: 500; color: var(--text);
+    display: flex; align-items: center; gap: 8px;
+    animation: toast-in 0.3s ease, toast-out 0.3s ease 2.7s forwards;
+    max-width: 280px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  @keyframes toast-in { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes toast-out { from { opacity:1; } to { opacity:0; } }
+  .toast .dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .toast.success .dot { background: var(--green); }
+  .toast.info .dot { background: var(--amber); }
+  .sidebar-inner { overflow-y: auto; overflow-x: hidden; }
+  .map-tooltip {
+    position: absolute; background: var(--dark-2); border: 1px solid var(--border-hover);
+    border-radius: 10px; padding: 10px 14px; pointer-events: none; z-index: 50;
+    max-width: 200px; display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  .map-tooltip.visible { display: block; }
+  .trending-badge {
+    font-size: 10px; font-weight: 700; font-family: 'Syne', sans-serif;
+    letter-spacing: 0.05em; text-transform: uppercase; color: var(--terra-light);
+    background: rgba(196,82,42,0.15); border: 1px solid rgba(196,82,42,0.3);
+    border-radius: 4px; padding: 2px 6px;
+  }
+  .new-badge {
+    font-size: 10px; font-weight: 700; font-family: 'Syne', sans-serif;
+    letter-spacing: 0.05em; text-transform: uppercase; color: var(--amber);
+    background: rgba(232,160,32,0.12); border: 1px solid rgba(232,160,32,0.25);
+    border-radius: 4px; padding: 2px 6px;
+  }
+  @media (max-width: 768px) {
+    .layout-split { flex-direction: column; }
+    .map-pane { height: 280px; }
+    .nav-title-sub { display: none; }
+    .desktop-only { display: none; }
+  }
+  @media (min-width: 769px) {
+    .mobile-only { display: none; }
+    .layout-split { flex-direction: row; }
+    .map-pane { width: 55%; height: calc(100vh - 60px); position: sticky; top: 60px; }
+    .sidebar-pane { width: 45%; min-height: calc(100vh - 60px); }
+    .sidebar-inner { height: calc(100vh - 60px); }
+  }
+  .tag-check { display: none; }
+  .tag-check-label {
+    display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 20px;
+    border: 1px solid var(--border); font-size: 12px; font-weight: 500; color: var(--text-muted);
+    background: rgba(42,30,15,0.8); cursor: pointer; transition: all 0.2s; user-select: none;
+  }
+  .tag-check:checked + .tag-check-label {
+    background: rgba(196,82,42,0.15); border-color: var(--terra); color: var(--terra-light);
+  }
+  .section-header {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
+  }
+  .search-input {
+    background: rgba(42,30,15,0.8); border: 1px solid var(--border); border-radius: 10px;
+    color: var(--text); padding: 9px 14px 9px 36px; font-family: 'DM Sans', sans-serif;
+    font-size: 13px; transition: border-color 0.2s; outline: none; width: 100%;
+  }
+  .search-input:focus { border-color: var(--terra); }
+  .search-input::placeholder { color: var(--muted); }
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+  .vibe-btn {
+    font-size: 22px; background: none; border: 2px solid var(--border);
+    border-radius: 8px; padding: 6px 10px; cursor: pointer; transition: all 0.15s;
+  }
+  .vibe-btn.selected { border-color: var(--terra); background: rgba(196,82,42,0.15); transform: scale(1.15); }
+</style>
+</head>
+<body>
+ 
+<!-- NAV -->
+<nav class="nav fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 md:px-6 h-60px">
+  <div class="flex items-center gap-3">
+    <div class="flex items-center justify-center w-8 h-8 rounded-lg" style="background: var(--terra);">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cream)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/>
+        <line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/>
+      </svg>
+    </div>
+    <div>
+      <span class="font-display font-800 text-base leading-none" style="color:var(--cream);font-family:'Syne',sans-serif;font-weight:800;">LocalBites</span>
+      <span class="nav-title-sub block text-xs leading-none" style="color:var(--muted);">vote for the dish</span>
+    </div>
+  </div>
+  <div class="flex items-center gap-2">
+    <span class="desktop-only text-xs mr-2" style="color:var(--muted);">
+      <span style="color:var(--amber);">Connaught Place, Delhi</span>
+    </span>
+    <button id="btn-open-modal" class="btn-primary" style="font-size:13px;padding:8px 16px;">+ Submit a Bite</button>
+    <button id="btn-mobile-lb" class="mobile-only btn-ghost" style="font-size:12px;padding:8px 12px;">🏆 Top 5</button>
+  </div>
+</nav>
+ 
+<!-- LAYOUT -->
+<div class="layout-split flex" style="margin-top:60px;">
+ 
+  <!-- MAP PANE -->
+  <div class="map-pane map-container" id="map-pane">
+    <div class="map-street" style="left:0;right:0;top:30%;height:40px;"></div>
+    <div class="map-street" style="left:0;right:0;top:60%;height:32px;"></div>
+    <div class="map-street" style="left:20%;top:0;bottom:0;width:36px;"></div>
+    <div class="map-street" style="left:55%;top:0;bottom:0;width:30px;"></div>
+    <div class="map-street" style="left:78%;top:0;bottom:0;width:24px;"></div>
+    <div class="map-block" style="left:2%;top:5%;width:16%;height:22%;"></div>
+    <div class="map-block" style="left:24%;top:5%;width:28%;height:22%;"></div>
+    <div class="map-block" style="left:58%;top:5%;width:18%;height:22%;"></div>
+    <div class="map-block" style="left:2%;top:33%;width:16%;height:22%;"></div>
+    <div class="map-block" style="left:24%;top:33%;width:28%;height:22%;"></div>
+    <div class="map-block" style="left:58%;top:33%;width:18%;height:22%;"></div>
+    <div class="map-block" style="left:80%;top:33%;width:18%;height:22%;"></div>
+    <div class="map-block" style="left:2%;top:63%;width:16%;height:24%;"></div>
+    <div class="map-block" style="left:24%;top:63%;width:28%;height:24%;"></div>
+    <div class="map-block" style="left:58%;top:63%;width:18%;height:24%;"></div>
+    <div class="map-block" style="left:80%;top:63%;width:18%;height:24%;"></div>
+    <div class="map-label" style="left:2%;top:31%;transform:translateY(-50%);">E 51st St</div>
+    <div class="map-label" style="left:2%;top:61%;transform:translateY(-50%);">E 48th St</div>
+    <div class="map-label" style="left:21%;bottom:4%;writing-mode:vertical-rl;transform:rotate(180deg);">Lexington Ave</div>
+    <div class="map-label" style="left:56%;bottom:4%;writing-mode:vertical-rl;transform:rotate(180deg);">Park Ave</div>
+    <div id="map-dots"></div>
+    <div class="map-tooltip" id="map-tooltip"></div>
+    <!-- You Are Here -->
+    <div style="position:absolute;left:38%;top:48%;transform:translate(-50%,-50%);z-index:20;">
+      <div class="map-pulse" style="width:20px;height:20px;left:-5px;top:-5px;"></div>
+      <div style="width:14px;height:14px;border-radius:50%;background:var(--amber);border:2px solid var(--cream);position:relative;z-index:2;box-shadow:0 0 0 4px rgba(232,160,32,0.2);"></div>
+    </div>
+    <div class="map-label" style="left:40%;top:46%;">📍 You</div>
+    <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(26,18,8,0.15) 0%,transparent 20%,transparent 80%,rgba(26,18,8,0.4) 100%);pointer-events:none;"></div>
+    <!-- Legend -->
+    <div style="position:absolute;bottom:16px;left:16px;background:rgba(26,18,8,0.85);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--text-muted);">
+      <div class="flex items-center gap-2 mb-1">
+        <div style="width:10px;height:10px;border-radius:50%;background:var(--terra);border:2px solid var(--cream);flex-shrink:0;"></div>
+        <span>Restaurant</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <div style="width:13px;height:13px;border-radius:50%;background:var(--amber);border:2px solid var(--cream);flex-shrink:0;"></div>
+        <span>Top-voted dish</span>
+      </div>
+    </div>
+    <!-- Zoom -->
+    <div style="position:absolute;top:16px;right:16px;display:flex;flex-direction:column;gap:4px;">
+      <button id="btn-zoom-in" style="width:32px;height:32px;background:rgba(26,18,8,0.85);border:1px solid var(--border);border-radius:6px 6px 0 0;color:var(--text-muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">+</button>
+      <button id="btn-zoom-out" style="width:32px;height:32px;background:rgba(26,18,8,0.85);border:1px solid var(--border);border-radius:0 0 6px 6px;color:var(--text-muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">−</button>
+    </div>
+    <div id="map-zoom-label" style="position:absolute;top:16px;left:16px;font-size:11px;color:var(--muted);background:rgba(26,18,8,0.7);padding:4px 8px;border-radius:5px;border:1px solid var(--border);">Zoom: 15</div>
+  </div>
+ 
+  <!-- SIDEBAR -->
+  <div class="sidebar-pane" style="background:var(--dark);">
+    <div class="sidebar-inner">
+      <div class="p-4 md:p-5">
+ 
+        <!-- Search -->
+        <div class="mb-4">
+          <div class="relative mb-3">
+            <svg class="absolute left-3 top-half translate-y-neg-half" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--muted)">
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+            </svg>
+            <input class="search-input" id="search-input" placeholder="Search dishes, restaurants…">
+          </div>
+          <!-- Flavor filters -->
+          <div class="flex gap-2 flex-wrap" id="flavor-filters">
+            <button class="flavor-tag active" data-tag="all">🍽 All</button>
+            <button class="flavor-tag" data-tag="🌶 Extra Spicy">🌶 Extra Spicy</button>
+            <button class="flavor-tag" data-tag="🍯 Sweet & Savory">🍯 Sweet & Savory</button>
+            <button class="flavor-tag" data-tag="🌙 Late-Night">🌙 Late-Night</button>
+            <button class="flavor-tag" data-tag="🍄 Umami Bomb">🍄 Umami Bomb</button>
+            <button class="flavor-tag" data-tag="🥬 Plant-Based">🥬 Plant-Based</button>
+            <button class="flavor-tag" data-tag="🧀 Comfort">🧀 Comfort</button>
+            <button class="flavor-tag" data-tag="🍋 Bright & Citrus">🍋 Bright & Citrus</button>
+          </div>
+        </div>
+ 
+        <!-- Sort -->
+        <div class="flex items-center justify-between mb-3">
+          <span class="section-header">Trending Dishes</span>
+          <select class="form-select" id="sort-select" style="width:auto;padding:5px 28px 5px 10px;font-size:12px;">
+            <option value="score">Top Voted</option>
+            <option value="distance">Nearest</option>
+            <option value="newest">Newest</option>
+            <option value="price_asc">Price ↑</option>
+            <option value="price_desc">Price ↓</option>
+          </select>
+        </div>
+ 
+        <!-- Feed -->
+        <div id="dish-feed" class="flex flex-col gap-3 mb-6"></div>
+        <div id="empty-state" class="empty-state" style="display:none;">
+          <div style="font-size:32px;margin-bottom:8px;">🍽</div>
+          <div style="font-size:14px;margin-bottom:4px;color:var(--text-muted);">No dishes match your filters.</div>
+          <div style="font-size:12px;">Try a different tag or <span id="empty-submit-link" style="color:var(--terra);cursor:pointer;">submit a new bite!</span></div>
+        </div>
+ 
+        <!-- Leaderboard -->
+        <div class="mb-6">
+          <div class="flex items-center justify-between mb-3">
+            <span class="section-header">🏆 Local Leaderboard — Top 5</span>
+          </div>
+          <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:12px 14px;">
+            <div id="leaderboard"></div>
+          </div>
+        </div>
+ 
+        <!-- CTA -->
+        <div style="background:linear-gradient(135deg,rgba(196,82,42,0.15),rgba(232,160,32,0.08));border:1px solid rgba(196,82,42,0.25);border-radius:12px;padding:20px;text-align:center;" class="mb-4">
+          <div style="font-size:24px;margin-bottom:6px;">📸</div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--cream);margin-bottom:4px;">Know a hidden gem?</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">Submit a dish and help your neighbors eat better.</div>
+          <button id="btn-cta-modal" class="btn-primary" style="width:100%;">Submit a Bite</button>
+        </div>
+ 
+      </div>
+    </div>
+  </div>
+</div>
+ 
+<!-- MOBILE LEADERBOARD PANEL -->
+<div id="mobile-lb-panel" class="mobile-only" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:300;background:var(--dark-2);border-top:1px solid var(--border);border-radius:16px 16px 0 0;padding:20px;max-height:70vh;overflow-y:auto;">
+  <div class="flex items-center justify-between mb-3">
+    <span class="section-header">🏆 Local Leaderboard — Top 5</span>
+    <button id="btn-close-mobile-lb" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;">✕</button>
+  </div>
+  <div id="mobile-leaderboard"></div>
+</div>
+ 
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-box" id="modal-box">
+    <div class="p-5 md:p-6">
+      <div class="flex items-center justify-between mb-5">
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:20px;color:var(--cream);">Submit a Bite</div>
+          <div style="font-size:12px;color:var(--muted);">Tell the neighborhood about a dish worth eating</div>
+        </div>
+        <button id="btn-close-modal" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;padding:4px;">✕</button>
+      </div>
+      <form id="submit-form">
+        <div class="flex flex-col gap-4">
+          <div class="flex gap-3">
+            <div style="flex:1;">
+              <label class="block text-xs mb-1" style="color:var(--text-muted);">Restaurant Name *</label>
+              <input class="form-input" id="f-restaurant" placeholder="e.g. Sakura Ramen" required>
+            </div>
+            <div style="flex:1;">
+              <label class="block text-xs mb-1" style="color:var(--text-muted);">Dish Name *</label>
+              <input class="form-input" id="f-dish" placeholder="e.g. Spicy Tonkotsu" required>
+            </div>
+          </div>
+          <div class="flex gap-3">
+            <div style="flex:1;">
+              <label class="block text-xs mb-1" style="color:var(--text-muted);">Price (₹) *</label>
+              <input class="form-input" id="f-price" type="number" step="0.01" min="0" placeholder="199" required>
+            </div>
+            <div style="flex:1;">
+              <label class="block text-xs mb-1" style="color:var(--text-muted);">Distance (meters)</label>
+              <input class="form-input" id="f-distance" type="number" step="1" min="0" max="10000" placeholder="500">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs mb-2" style="color:var(--text-muted);">Flavor Tags (pick up to 3)</label>
+            <div class="flex flex-wrap gap-2">
+              <input type="checkbox" class="tag-check" id="t1" value="🌶 Extra Spicy"><label class="tag-check-label" for="t1">🌶 Extra Spicy</label>
+              <input type="checkbox" class="tag-check" id="t2" value="🍯 Sweet & Savory"><label class="tag-check-label" for="t2">🍯 Sweet & Savory</label>
+              <input type="checkbox" class="tag-check" id="t3" value="🌙 Late-Night"><label class="tag-check-label" for="t3">🌙 Late-Night</label>
+              <input type="checkbox" class="tag-check" id="t4" value="🍄 Umami Bomb"><label class="tag-check-label" for="t4">🍄 Umami Bomb</label>
+              <input type="checkbox" class="tag-check" id="t5" value="🥬 Plant-Based"><label class="tag-check-label" for="t5">🥬 Plant-Based</label>
+              <input type="checkbox" class="tag-check" id="t6" value="🧀 Comfort"><label class="tag-check-label" for="t6">🧀 Comfort</label>
+              <input type="checkbox" class="tag-check" id="t7" value="🍋 Bright & Citrus"><label class="tag-check-label" for="t7">🍋 Bright & Citrus</label>
+              <input type="checkbox" class="tag-check" id="t8" value="🥩 Meat-Heavy"><label class="tag-check-label" for="t8">🥩 Meat-Heavy</label>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs mb-1" style="color:var(--text-muted);">Short Review *</label>
+            <textarea class="form-textarea" id="f-review" placeholder="What made this dish unforgettable? (min 10 chars)" required minlength="10"></textarea>
+          </div>
+          <div>
+            <label class="block text-xs mb-2" style="color:var(--text-muted);">Vibe Rating</label>
+            <div class="flex gap-3" id="vibe-selector">
+              <button type="button" class="vibe-btn" data-vibe="🔥">🔥</button>
+              <button type="button" class="vibe-btn" data-vibe="😍">😍</button>
+              <button type="button" class="vibe-btn" data-vibe="👌">👌</button>
+              <button type="button" class="vibe-btn" data-vibe="🤤">🤤</button>
+              <button type="button" class="vibe-btn" data-vibe="💯">💯</button>
+            </div>
+          </div>
+          <div class="flex gap-3 mt-2">
+            <button type="button" id="btn-cancel-modal" class="btn-ghost" style="flex:1;">Cancel</button>
+            <button type="submit" class="btn-primary" style="flex:2;">🍴 Submit Dish</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+ 
+<!-- TOAST -->
+<div class="toast-container" id="toast-container"></div>
+ 
+<script>
+(function () {
+  // ── DATA ──────────────────────────────────────────
+  var STORAGE_KEY = 'localbites_data_v3';
+  var VOTES_KEY   = 'localbites_votes_v3';
+ 
+  var SEED = [
+    { id:'d1', restaurant:'Sakura Ramen House', dish:"The 'Tsunami' Spicy Tuna Roll", price:1560, distance:480, tags:['🌶 Extra Spicy','🍄 Umami Bomb'], review:"Rolled in togarashi with a sriracha aioli that'll haunt you in the best way. Peak Tuesday comfort.", vibe:'🔥', score:142, trending:true, isNew:false, mapPos:{x:28,y:20}, added:Date.now()-864000000 },
+    { id:'d2', restaurant:'Honey Bird', dish:'Crispy Hot Honey Chicken Sando', price:1349, distance:965, tags:['🍯 Sweet & Savory','🧀 Comfort'], review:'Double-fried thigh, house fermented honey glaze, dill pickles on a milk bun. Simple genius.', vibe:'😍', score:118, trending:true, isNew:false, mapPos:{x:65,y:15}, added:Date.now()-432000000 },
+    { id:'d3', restaurant:'Noche Tacos', dish:'Birria Quesabirria Stack', price:1179, distance:640, tags:['🌙 Late-Night','🧀 Comfort','🥩 Meat-Heavy'], review:'Oaxacan cheese pulls, consommé so deep it fixes everything. Only after 11pm. Worth it.', vibe:'🤤', score:97, trending:false, isNew:false, mapPos:{x:14,y:68}, added:Date.now()-259200000 },
+    { id:'d4', restaurant:'Green Theory', dish:'Miso Glazed Eggplant Skewers', price:1053, distance:1290, tags:['🥬 Plant-Based','🍄 Umami Bomb'], review:'White miso + mirin reduction caramelized to a lacquer. Paired with sesame rice — genuinely transformative.', vibe:'👌', score:73, trending:false, isNew:false, mapPos:{x:80,y:72}, added:Date.now()-172800000 },
+    { id:'d5', restaurant:'Citrus & Salt', dish:'Yuzu Hamachi Crudo', price:1854, distance:1770, tags:['🍋 Bright & Citrus','🍄 Umami Bomb'], review:"Paper-thin hamachi, yuzu kosho, micro shiso. Ocean in a bite. The ₹1854 you'll never regret.", vibe:'💯', score:64, trending:false, isNew:false, mapPos:{x:62,y:55}, added:Date.now()-86400000 },
+    { id:'d6', restaurant:'The Night Owl Diner', dish:'Smash Burger Stack w/ Truffle Aioli', price:1517, distance:320, tags:['🌙 Late-Night','🧀 Comfort','🥩 Meat-Heavy'], review:'Open 24/7. Double smash, American cheese, house truffle aioli on a brioche bun. Ideal at 2am.', vibe:'🤤', score:55, trending:false, isNew:false, mapPos:{x:36,y:40}, added:Date.now()-43200000 },
+    { id:'d7', restaurant:'Pho & Soul', dish:'Slow-Burn Brisket Pho', price:1475, distance:1450, tags:['🌶 Extra Spicy','🍄 Umami Bomb'], review:'18-hour bone broth, melt-off brisket, fresh Thai basil. Spice builds slow. Last spoonful hits hardest.', vibe:'🔥', score:41, trending:false, isNew:false, mapPos:{x:73,y:35}, added:Date.now()-21600000 },
+    { id:'d8', restaurant:"Masa's Corner", dish:'Adobo Fried Rice with Chicharon', price:1096, distance:805, tags:['🍯 Sweet & Savory','🧀 Comfort'], review:'Filipino home cooking, elevated. Adobo-glazed rice, crispy pork skin crumble. Worth every calorie.', vibe:'😍', score:29, trending:false, isNew:true, mapPos:{x:25,y:55}, added:Date.now()-3600000 }
+  ];
+ 
+  var state = { dishes: [] };
+  var votes = {};
+  var activeFilter = 'all';
+  var sortOrder    = 'score';
+  var selectedVibe = '';
+  var mapZoomLevel = 15;
+ 
+  function load() {
+    try {
+      var d = localStorage.getItem(STORAGE_KEY);
+      var v = localStorage.getItem(VOTES_KEY);
+      if (d) state = JSON.parse(d);
+      if (v) votes = JSON.parse(v);
+    } catch(e) {}
+    if (!state.dishes || !state.dishes.length) { state.dishes = SEED; save(); }
+  }
+ 
+  function save() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      localStorage.setItem(VOTES_KEY, JSON.stringify(votes));
+    } catch(e) {}
+  }
+ 
+  // ── HELPERS ───────────────────────────────────────
+  function esc(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+ 
+  function showToast(msg, type) {
+    var c = document.getElementById('toast-container');
+    var t = document.createElement('div');
+    t.className = 'toast ' + (type||'info');
+    t.innerHTML = '<div class="dot"></div><span>' + msg + '</span>';
+    c.appendChild(t);
+    setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 3200);
+  }
+ 
+  // ── FILTER / SORT ─────────────────────────────────
+  function getFiltered() {
+    var q = (document.getElementById('search-input').value||'').trim().toLowerCase();
+    var list = state.dishes.slice();
+    if (activeFilter !== 'all') {
+      list = list.filter(function(d){ return d.tags && d.tags.indexOf(activeFilter) !== -1; });
+    }
+    if (q) {
+      list = list.filter(function(d){
+        return (d.dish||'').toLowerCase().indexOf(q) !== -1 ||
+               (d.restaurant||'').toLowerCase().indexOf(q) !== -1 ||
+               (d.review||'').toLowerCase().indexOf(q) !== -1;
+      });
+    }
+    list.sort(function(a,b){
+      if (sortOrder === 'score')      return b.score - a.score;
+      if (sortOrder === 'distance')   return (a.distance||999) - (b.distance||999);
+      if (sortOrder === 'newest')     return (b.added||0) - (a.added||0);
+      if (sortOrder === 'price_asc')  return a.price - b.price;
+      if (sortOrder === 'price_desc') return b.price - a.price;
+      return 0;
+    });
+    return list;
+  }
+ 
+  // ── RENDER FEED ───────────────────────────────────
+  function render() {
+    var dishes = getFiltered();
+    var feed  = document.getElementById('dish-feed');
+    var empty = document.getElementById('empty-state');
+    if (!dishes.length) {
+      feed.innerHTML = '';
+      empty.style.display = 'block';
+    } else {
+      empty.style.display = 'none';
+      feed.innerHTML = dishes.map(cardHTML).join('');
+    }
+    renderLB();
+    renderMap();
+  }
+ 
+  function cardHTML(d) {
+    var mv  = votes[d.id] || null;
+    var sc  = d.score;
+    var scC = sc > 0 ? 'positive' : sc < 0 ? 'negative' : 'neutral';
+    var tags = (d.tags||[]).map(function(t){
+      return '<span class="flavor-tag" style="pointer-events:none;font-size:11px;padding:3px 9px;">'+esc(t)+'</span>';
+    }).join('');
+    return '<div class="dish-card '+(mv==='up'?'voted-up':mv==='down'?'voted-down':'')+'" data-id="'+d.id+'" data-action="card">'+
+      '<div class="p-3 md:p-4">'+
+        '<div class="flex gap-3">'+
+          '<div class="flex flex-col items-center gap-1 pt-1" style="flex-shrink:0;">'+
+            '<button class="vote-btn up '+(mv==='up'?'active':'')+'" data-id="'+d.id+'" data-action="vote-up" title="Upvote">'+
+              '<svg width="14" height="14" viewBox="0 0 24 24" fill="'+(mv==='up'?'currentColor':'none')+'" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>'+
+            '</button>'+
+            '<span class="score-badge '+scC+'" id="score-'+d.id+'">'+sc+'</span>'+
+            '<button class="vote-btn down '+(mv==='down'?'active':'')+'" data-id="'+d.id+'" data-action="vote-down" title="Downvote">'+
+              '<svg width="14" height="14" viewBox="0 0 24 24" fill="'+(mv==='down'?'currentColor':'none')+'" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>'+
+            '</button>'+
+          '</div>'+
+          '<div style="flex:1;min-width:0;">'+
+            '<div class="flex items-start gap-2 mb-1 flex-wrap">'+
+              '<span style="font-family:Syne,sans-serif;font-weight:700;font-size:14px;color:var(--cream);">'+esc(d.dish)+'</span>'+
+              (d.vibe ? '<span style="font-size:14px;">'+d.vibe+'</span>' : '')+
+              (d.trending ? '<span class="trending-badge">Trending</span>' : '')+
+              (d.isNew    ? '<span class="new-badge">New</span>' : '')+
+            '</div>'+
+            '<div style="font-size:12px;color:var(--terra-light);margin-bottom:8px;">@ '+esc(d.restaurant)+'</div>'+
+            '<div class="flex items-center gap-3 mb-2 flex-wrap">'+
+              '<span class="price-badge">₹'+Math.round(d.price)+'</span>'+
+              '<span class="dist-badge"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>'+(d.distance!=null?d.distance:'?')+' m away</span>'+
+            '</div>'+
+            (d.review ? '<p style="font-size:12px;color:var(--text-muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:8px;line-height:1.5;">"'+esc(d.review)+'"</p>' : '')+
+            '<div class="flex flex-wrap gap-1">'+tags+'</div>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }
+ 
+  // ── LEADERBOARD ───────────────────────────────────
+  function renderLB() {
+    var top5 = state.dishes.slice().sort(function(a,b){ return b.score-a.score; }).slice(0,5);
+    var html = top5.map(function(d,i){
+      var cls = ['gold','silver','bronze','other','other'][i];
+      var medal = ['🥇','🥈','🥉',4,5][i];
+      return '<div class="lb-row">'+
+        '<div class="lb-rank '+cls+'">'+medal+'</div>'+
+        '<div style="flex:1;min-width:0;">'+
+          '<div style="font-family:Syne,sans-serif;font-weight:700;font-size:12px;color:var(--cream);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(d.dish)+'</div>'+
+          '<div style="font-size:11px;color:var(--terra-light);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">@ '+esc(d.restaurant)+'</div>'+
+        '</div>'+
+        '<div class="flex items-center gap-2" style="flex-shrink:0;">'+
+          '<span class="score-badge positive">'+d.score+'</span>'+
+          '<span class="price-badge" style="font-size:11px;">₹'+Math.round(d.price)+'</span>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+    var lb = document.getElementById('leaderboard');
+    var ml = document.getElementById('mobile-leaderboard');
+    if (lb) lb.innerHTML = html;
+    if (ml) ml.innerHTML = html;
+  }
+ 
+  // ── MAP ───────────────────────────────────────────
+  function renderMap() {
+    var container = document.getElementById('map-dots');
+    var pane      = document.getElementById('map-pane');
+    if (!container) return;
+    container.innerHTML = '';
+    var top3 = state.dishes.slice().sort(function(a,b){return b.score-a.score;}).slice(0,3).map(function(d){return d.id;});
+ 
+    state.dishes.forEach(function(d){
+      if (!d.mapPos) return;
+      var isTop = top3.indexOf(d.id) !== -1;
+      var dot = document.createElement('div');
+      dot.className = 'map-dot' + (isTop ? ' top-dish' : '');
+      dot.style.left = d.mapPos.x + '%';
+      dot.style.top  = d.mapPos.y + '%';
+      dot.id = 'dot-' + d.id;
+ 
+      dot.addEventListener('mouseenter', function(){ showTip(d, dot, pane); });
+      dot.addEventListener('mouseleave', hideTip);
+      dot.addEventListener('click', function(){
+        document.querySelectorAll('.map-dot').forEach(function(el){ el.classList.remove('active'); });
+        dot.classList.add('active');
+        var card = document.getElementById('card-' + d.id);
+        if (card) card.scrollIntoView({behavior:'smooth', block:'nearest'});
+      });
+      container.appendChild(dot);
+ 
+      if (isTop) {
+        var lbl = document.createElement('div');
+        lbl.className = 'map-label';
+        lbl.style.left = (d.mapPos.x + 2) + '%';
+        lbl.style.top  = (d.mapPos.y - 6) + '%';
+        lbl.textContent = d.restaurant.split(' ').slice(0,2).join(' ');
+        container.appendChild(lbl);
+      }
+    });
+  }
+ 
+  function showTip(d, dot, pane) {
+    var tip  = document.getElementById('map-tooltip');
+    var pr   = pane.getBoundingClientRect();
+    var dr   = dot.getBoundingClientRect();
+    tip.innerHTML =
+      '<div style="font-family:Syne,sans-serif;font-weight:700;font-size:12px;color:var(--cream);margin-bottom:4px;">'+esc(d.dish)+'</div>'+
+      '<div style="font-size:11px;color:var(--terra-light);margin-bottom:6px;">@ '+esc(d.restaurant)+'</div>'+
+      '<div class="flex items-center gap-2">'+
+        '<span class="price-badge" style="font-size:11px;">₹'+Math.round(d.price)+'</span>'+
+        '<span style="font-size:11px;color:var(--muted);">'+d.distance+' m</span>'+
+        '<span class="score-badge positive" style="font-size:11px;">'+d.score+' pts</span>'+
+      '</div>';
+    tip.style.left = Math.min(dr.left - pr.left + 16, pr.width - 220) + 'px';
+    tip.style.top  = Math.max(dr.top  - pr.top  - 80, 10) + 'px';
+    tip.classList.add('visible');
+  }
+ 
+  function hideTip() {
+    document.getElementById('map-tooltip').classList.remove('visible');
+  }
+ 
+  // ── VOTING (event delegation on feed) ────────────
+  document.getElementById('dish-feed').addEventListener('click', function(e) {
+    var voteUp   = e.target.closest('[data-action="vote-up"]');
+    var voteDown = e.target.closest('[data-action="vote-down"]');
+    var card     = e.target.closest('[data-action="card"]');
+ 
+    if (voteUp || voteDown) {
+      e.stopPropagation();
+      var id  = (voteUp || voteDown).getAttribute('data-id');
+      var dir = voteUp ? 'up' : 'down';
+      var dish = state.dishes.find(function(d){ return d.id === id; });
+      if (!dish) return;
+      var prev = votes[id] || null;
+      if (prev === dir) {
+        dish.score += (dir === 'up' ? -1 : 1);
+        votes[id] = null;
+      } else {
+        if (prev === 'up')   dish.score--;
+        if (prev === 'down') dish.score++;
+        dish.score += (dir === 'up' ? 1 : -1);
+        votes[id] = dir;
+      }
+      save();
+      render();
+      showToast(dir === 'up' ? '👍 Upvote recorded!' : '👎 Downvote noted.', dir === 'up' ? 'success' : 'info');
+      return;
+    }
+    if (card) {
+      var id2 = card.getAttribute('data-id');
+      document.querySelectorAll('.map-dot').forEach(function(el){ el.classList.remove('active'); });
+      var dot = document.getElementById('dot-' + id2);
+      if (dot) dot.classList.add('active');
+    }
+  });
+ 
+  // ── FLAVOR FILTERS ────────────────────────────────
+  document.getElementById('flavor-filters').addEventListener('click', function(e) {
+    var btn = e.target.closest('.flavor-tag');
+    if (!btn) return;
+    activeFilter = btn.getAttribute('data-tag');
+    document.querySelectorAll('#flavor-filters .flavor-tag').forEach(function(el){ el.classList.remove('active'); });
+    btn.classList.add('active');
+    render();
+  });
+ 
+  // ── SEARCH ────────────────────────────────────────
+  document.getElementById('search-input').addEventListener('input', function(){ render(); });
+ 
+  // ── SORT ──────────────────────────────────────────
+  document.getElementById('sort-select').addEventListener('change', function(){ sortOrder = this.value; render(); });
+ 
+  // ── MODAL OPEN/CLOSE ──────────────────────────────
+  function openModal() {
+    document.getElementById('modal-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+    document.getElementById('submit-form').reset();
+    selectedVibe = '';
+    document.querySelectorAll('.vibe-btn').forEach(function(b){ b.classList.remove('selected'); });
+  }
+ 
+  document.getElementById('btn-open-modal').addEventListener('click', openModal);
+  document.getElementById('btn-cta-modal').addEventListener('click', openModal);
+  document.getElementById('btn-close-modal').addEventListener('click', closeModal);
+  document.getElementById('btn-cancel-modal').addEventListener('click', closeModal);
+  document.getElementById('modal-overlay').addEventListener('click', function(e){
+    if (e.target === this) closeModal();
+  });
+  document.getElementById('empty-submit-link').addEventListener('click', openModal);
+ 
+  // ── VIBE BUTTONS ──────────────────────────────────
+  document.getElementById('vibe-selector').addEventListener('click', function(e) {
+    var btn = e.target.closest('.vibe-btn');
+    if (!btn) return;
+    selectedVibe = btn.getAttribute('data-vibe');
+    document.querySelectorAll('.vibe-btn').forEach(function(b){ b.classList.remove('selected'); });
+    btn.classList.add('selected');
+  });
+ 
+  // ── FORM SUBMIT ───────────────────────────────────
+  document.getElementById('submit-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var restaurant = document.getElementById('f-restaurant').value.trim();
+    var dish       = document.getElementById('f-dish').value.trim();
+    var price      = parseFloat(document.getElementById('f-price').value);
+    var dist       = parseFloat(document.getElementById('f-distance').value) || 500;
+    var review     = document.getElementById('f-review').value.trim();
+    var checked    = document.querySelectorAll('.tag-check:checked');
+    var tags       = Array.prototype.slice.call(checked, 0, 3).map(function(t){ return t.value; });
+ 
+    if (!restaurant || !dish || isNaN(price) || !review) {
+      showToast('Please fill in all required fields.', 'info');
+      return;
+    }
+    var newDish = {
+      id: 'u' + Date.now(),
+      restaurant: restaurant, dish: dish, price: price,
+      distance: dist, tags: tags, review: review,
+      vibe: selectedVibe || '🔥', score: 1, trending: false, isNew: true,
+      mapPos: { x: 5 + Math.random() * 88, y: 5 + Math.random() * 88 },
+      added: Date.now()
+    };
+    state.dishes.unshift(newDish);
+    votes[newDish.id] = 'up';
+    save();
+    closeModal();
+    render();
+    showToast('🍴 Dish submitted! Thanks for the tip.', 'success');
+  });
+ 
+  // ── ZOOM ──────────────────────────────────────────
+  document.getElementById('btn-zoom-in').addEventListener('click', function(){
+    mapZoomLevel = Math.min(19, mapZoomLevel + 1);
+    document.getElementById('map-zoom-label').textContent = 'Zoom: ' + mapZoomLevel;
+  });
+  document.getElementById('btn-zoom-out').addEventListener('click', function(){
+    mapZoomLevel = Math.max(12, mapZoomLevel - 1);
+    document.getElementById('map-zoom-label').textContent = 'Zoom: ' + mapZoomLevel;
+  });
+ 
+  // ── MOBILE LEADERBOARD ────────────────────────────
+  document.getElementById('btn-mobile-lb').addEventListener('click', function(){
+    var p = document.getElementById('mobile-lb-panel');
+    p.style.display = p.style.display === 'none' ? 'block' : 'none';
+  });
+  document.getElementById('btn-close-mobile-lb').addEventListener('click', function(){
+    document.getElementById('mobile-lb-panel').style.display = 'none';
+  });
+ 
+  // ── BOOT ──────────────────────────────────────────
+  load();
+  render();
+})();
+</script>
+</body>
+</html>
